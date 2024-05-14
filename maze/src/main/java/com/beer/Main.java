@@ -1,21 +1,15 @@
 package com.beer;
 
-import java.awt.EventQueue;
-import javax.swing.UIManager;
+import javax.swing.SwingUtilities;
 
 public class Main {
     public static void main(String[] args) {
-        EventQueue.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                
-                new Window(10, 10);
-            }
-        });
+        SwingUtilities.invokeLater(new Runnable() {
+         public void run() {
+            Maze game = new Maze(50, 50, 15, 15);
+
+            game.startPlay();
+         }
+      });
     }
 }
