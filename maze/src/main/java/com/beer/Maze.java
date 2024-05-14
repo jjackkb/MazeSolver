@@ -1,22 +1,24 @@
 package com.beer;
 import java.awt.Point;
-import java.util.ArrayList;
 
 public class Maze {
     private int x;
     private int y;
     private Point start;
     private Point end;
-    private InputListener inputListener;
     protected Window win;
-    public Maze(int sq_X, int sq_Y, int cell_W, int cell_H) {
+    private InputListener inputListener;
+    public Maze(double randPercent, Window window) {
+        assert (randPercent <= 1.0 && randPercent >= 0.0);
+
+        win = window;
         inputListener = new InputListener(this);
-        win = new Window(sq_X, sq_Y, cell_H, cell_W);
-        x = 0;
+        x = 0; 
         y = 0;
 
         win.getContentPane().add(inputListener);
         genRandomStartEnd();
+        genBarriers(randPercent);
     }
 
     public void genRandomStartEnd() {
@@ -28,8 +30,21 @@ public class Maze {
 
         this.start = start;
         this.end = end;
-        win.grid.setStartCell(start);
-        win.grid.setEndCell(end);
+        win.setStartCell(start);
+        win.setEndCell(end);
+    }
+
+    public void genBarriers(double percent) {
+        int max = (int) (percent*(win.getNumSquaresX()*win.getNumSquaresY()));
+
+        for (int i = 0; i < max; i++) {
+            int randX = (int) (Math.random() * win.getNumSquaresX());
+            int randY = (int) (Math.random() * win.getNumSquaresY());
+
+            if (win.checkLoc(randX, randY) && !checkFinish(randX, randY)) {
+                win.disableCell(new Point(randX, randY));
+            }
+        }
     }
 
     public void startPlay() {
@@ -37,50 +52,17 @@ public class Maze {
         y = start.y;
     }
 
-    public void genShortPath() {
-        int initDist = win.getDist(start, end);
-        int length = (int) (Math.random() * (win.getNumSquaresX()*win.getNumSquaresY()-initDist)) + initDist;
-        System.out.println(length);
-        Point randPoint = start;
-        ArrayList<Point> possibles;
-
-        for (int i = 0; i < length; i++) {
-            possibles = getPossibles(randPoint, length-i);
-            Point min = randPoint;
-
-            for (Point p : possibles)
-                if (win.getDist(p, end) < win.getDist(min, end))
-                    min = p;
-
-            randPoint = min;
-
-            if (randPoint.x == end.x && randPoint.y == end.y) {
-                System.out.println("Found end point in " + i + " moves");
-                return;
-            }
-
-            System.out.println(i);
-            win.grid.enableCell(randPoint);
-            win.grid.reload();
-            try {
-                Thread.sleep(050);
-            } catch (Exception e) {System.out.println(e);}
+    public boolean checkFinish() {
+        if (x == end.x && y == end.y) {
+           return true;
         }
+        return false;
     }
-
-    private ArrayList<Point> getPossibles(Point p, int length) {
-        ArrayList<Point> arr = new ArrayList<>();
-
-        for (int x = -1; x <= 1; x += 2) {
-            if (win.checkLoc(p.x + x, p.y))
-                if (length > win.getDist(p.x + x, p.y, end))
-                    arr.add(new Point(p.x + x, p.y));
-            if (win.checkLoc(p.x, p.y + x))
-                if (length > win.getDist(p.x, p.y + x, end))
-                    arr.add(new Point(p.x, p.y + x));
+    public boolean checkFinish(int x, int y) {
+        if (x == end.x && y == end.y) {
+           return true;
         }
-
-        return arr;
+        return false;
     }
 
     public int getX() {
@@ -89,28 +71,27 @@ public class Maze {
     public int getY() {
         return y;
     }
-    public void setX(int newX) {
-        int t = x;
-        x = newX;
 
-        if (win.grid.isVisited(x, y)) {
-            x = t;
+    public void setX(int newX) {
+        if (!win.checkLoc(newX, y)) {
+            return;
         }
         else {
-            win.grid.visitCell(x, y);
+            x = newX;
+            win.visitCell(new Point(x, y));
         }
-        win.grid.reload();
+        win.reload();
+        checkFinish();
     }
     public void setY(int newY) {
-        int t = y;
-        y = newY;
-
-        if (win.grid.isVisited(x, y)) {
-            y = t;
+        if (!win.checkLoc(x, newY)) {
+            return;
         }
         else {
-            win.grid.visitCell(x, y);
+            y = newY;
+            win.visitCell(new Point(x, y));
         }
-        win.grid.reload();
+        win.reload();
+        checkFinish();
     }
 }

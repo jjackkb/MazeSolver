@@ -1,4 +1,7 @@
 package com.beer;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import java.awt.Point;
@@ -8,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Window extends JFrame {
+    private double barrierPercent;
     private int numSquaresX;
     private int numSquaresY;
     private int window_W;
@@ -15,21 +19,49 @@ public class Window extends JFrame {
     private int cell_W;
     private int cell_H;
     protected Grid grid;
-    public Window(int sq_X, int sq_Y, int C_w, int C_h) {
+    protected Maze maze;
+    public Window(int sq_X, int sq_Y, int C_w, int C_h, double percent) {
         super("Maze"); 
+        barrierPercent = percent; 
         numSquaresX = sq_X;
         numSquaresY = sq_Y;
         cell_W = C_w;
         cell_H = C_h;
-        window_W = (numSquaresX * cell_W) + 50;
+        window_W = (numSquaresX * cell_W) + (2*cell_W);
         window_H = (numSquaresY * cell_H) + 250;
         
         grid = new Grid(numSquaresX, numSquaresY, cell_W, cell_H);
+        maze = new Maze(barrierPercent, this);
+        JButton resetButton = new JButton("reset");
+
+        resetButton.setBounds((window_W/2)-40, window_H-75, (window_W/2)+40, window_H-50); 
+        resetButton.setSize(80, 35); 
         setSize(window_W, window_H);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        resetButton.addActionListener(new ActionListener(){  
+            public void actionPerformed(ActionEvent e){  
+                        resetMaze();
+                    }  
+                });  
+
+        add(resetButton);
         add(grid);
+
+        maze.startPlay();
         setVisible(true);
+    }
+
+    public void resetMaze() {
+        grid.disabledCells.clear();
+        maze = new Maze(barrierPercent, this);
+        grid.enabledCells.clear();
+        grid.visitedCells.clear();
+        maze.startPlay();
+    }
+    public void reload() {
+        grid.paintComponent(getGraphics());
     }
 
     public boolean checkLoc(int x, int y) {
@@ -38,12 +70,6 @@ public class Window extends JFrame {
                 if (grid.checkLoc(x, y))
                     return true;
         return false;
-    }
-    public int getDist(int x, int y, Point p) {
-        return Math.abs(x - p.x) + Math.abs(y - p.y);
-    }
-    public int getDist(Point p1, Point p2) {
-        return Math.abs(p1.x - p2.x) + Math.abs(p1.y - p2.y);
     }
     public int getNumSquaresX() {
         return numSquaresX;
@@ -63,25 +89,41 @@ public class Window extends JFrame {
     public int getWin_H() {
         return window_H;
     }
+
+    public void setStartCell(Point p) {
+        grid.start = p;
+    }
+    public void setEndCell(Point p) {
+        grid.end = p;
+    }
+    public void disableCell(Point p) {
+        grid.disabledCells.add(p);
+    }
+    public void visitCell(Point p) {
+        grid.visitedCells.add(p);
+    }
 }
 
 class Grid extends JPanel {
-    private List<Point> enabledCells;
-    private List<Point> disabledCells;
-    private List<Point> visitedCells;
-    private Point start;
-    private Point end;
-    private int width;
-    private int height;
-    private int sizeWidth;
-    private int sizeHeight;
+    protected List<Point> enabledCells;
+    protected List<Point> disabledCells;
+    protected List<Point> visitedCells;
+    protected Point start;
+    protected Point end;
+    protected int width;
+    protected int height;
+    protected int sqSizeWidth;
+    protected int sqSizeHeight;
+    protected int sqNumWidth;
+    protected int sqNumHeight;
     public Grid(int sqX, int sqY, int sWidth, int sHeight) {
         super();
-        sizeWidth = sWidth;
-        sizeHeight = sHeight;
-
-        width = sqX * sizeWidth;
-        height = sqY * sizeHeight;
+        sqNumWidth = sqX;
+        sqNumHeight = sqY;
+        sqSizeWidth = sWidth;
+        sqSizeHeight = sHeight;
+        width = sqX * sqSizeWidth;
+        height = sqY * sqSizeHeight;
 
         enabledCells = new ArrayList<>();
         disabledCells = new ArrayList<>();
@@ -92,47 +134,50 @@ class Grid extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         //background
-        g.setColor(Color.darkGray);
-        g.fillRect(sizeWidth, sizeHeight, width, height);
+        g.setColor(new Color(253,255,252));
+        g.fillRect(sqSizeWidth, sqSizeHeight, width, height);
         //start/end Points
-        g.setColor(Color.green);
-        g.fillRect((sizeWidth+(start.x*sizeWidth)), (sizeHeight+(start.y*sizeHeight)), sizeWidth, sizeHeight);
-        g.setColor(Color.red);
-        g.fillRect((sizeWidth+(end.x*sizeWidth)), (sizeHeight+(end.y*sizeHeight)), sizeWidth, sizeHeight);
+        g.setColor(new Color(76,185,68));
+        g.fillRect((sqSizeWidth+(start.x*sqSizeWidth)), (sqSizeHeight+(start.y*sqSizeHeight)), sqSizeWidth, sqSizeHeight);
+        g.setColor(new Color(171,52,40));
+        g.fillRect((sqSizeWidth+(end.x*sqSizeWidth)), (sqSizeHeight+(end.y*sqSizeHeight)), sqSizeWidth, sqSizeHeight);
 
-        for (Point fillCell : enabledCells) { //draw enabled cells
-            int cellX = sizeWidth + (fillCell.x * sizeWidth);
-            int cellY = sizeHeight + (fillCell.y * sizeHeight);
-            g.setColor(Color.white);
-            g.fillRect(cellX, cellY, sizeWidth, sizeHeight);
+        for (Point fillCell : disabledCells) { //draw disabled cells
+            int cellX = sqSizeWidth + (fillCell.x * sqSizeWidth);
+            int cellY = sqSizeHeight + (fillCell.y * sqSizeHeight);
+            g.setColor(Color.BLACK);
+            g.fillRect(cellX, cellY, sqSizeWidth, sqSizeHeight);
         }
-        
+
         for (Point fillCell : visitedCells) { //draw visited cells
-            int cellX = sizeWidth + (fillCell.x * sizeWidth);
-            int cellY = sizeHeight + (fillCell.y * sizeHeight);
-            g.setColor(Color.yellow);
-            g.fillRect(cellX, cellY, sizeWidth, sizeHeight);
+            int cellX = sqSizeWidth + (fillCell.x * sqSizeWidth);
+            int cellY = sqSizeHeight + (fillCell.y * sqSizeHeight);
+            g.setColor(new Color(244,158,76));
+            g.fillRect(cellX, cellY, sqSizeWidth, sqSizeHeight);
         }
         
         //outer Rectangle
-        g.setColor(Color.BLACK);
-        g.drawRect(sizeWidth, sizeHeight, width, height);
-        
+        g.setColor(new Color(42,43,42));
+        g.drawRect(sqSizeWidth, sqSizeHeight, width, height);
         //crossed lines
-        for (int i = sizeWidth; i <= width; i += sizeWidth) { //horizontal
-            g.drawLine(i, sizeHeight, i, height+sizeHeight);
+        for (int i = sqSizeWidth; i <= width; i += sqSizeWidth) { //horizontal
+            g.drawLine(i, sqSizeHeight, i, height+sqSizeHeight);
         }
-        
-        for (int i = sizeHeight; i <= height; i += sizeHeight) { //vertical
-            g.drawLine(sizeWidth, i, width+sizeHeight, i); 
+        for (int i = sqSizeHeight; i <= height; i += sqSizeHeight) { //vertical
+            g.drawLine(sqSizeWidth, i, width+sqSizeHeight, i); 
         }
     }
-    
-    public void reload() {
-        paintComponent(getGraphics());
-    }
+
     public boolean isEnabled(int x, int y) {
         for (Point p : enabledCells) {
+            if (p.x == x && p.y == y) {
+                return true;
+            }
+        }
+        return false;
+    }
+    public boolean isDisabled(int x, int y) {
+        for (Point p : disabledCells) {
             if (p.x == x && p.y == y) {
                 return true;
             }
@@ -164,36 +209,5 @@ class Grid extends JPanel {
                 return false;
 
         return true;
-    }
-
-    public void clearEnabled() {
-        enabledCells.clear();
-    }
-    public void setStartCell(Point p) {
-        start = new Point(p);
-    }
-    public void setEndCell(Point p) {
-        end = new Point(p);
-    }
-    public void enableCell(Point p) {
-        enabledCells.add(p);
-    }
-    public void enableCell(int x, int y) {
-        enabledCells.add(new Point(x, y));
-    }
-    public void disableCell(Point p) {
-        disabledCells.add(p);
-    }
-    public void disableCell(int x, int y) {
-        disabledCells.add(new Point(x, y));
-    }
-    public void visitCell(Point p) {
-        visitedCells.add(p);
-    }
-    public void visitCell(int x, int y) {
-        visitedCells.add(new Point(x, y));
-    }
-    public void leaveCell(int x, int y) {
-        visitedCells.remove(new Point(x, y));
     }
 }

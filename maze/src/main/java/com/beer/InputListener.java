@@ -1,5 +1,4 @@
 package com.beer;
-
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -39,7 +38,7 @@ public class InputListener extends JPanel {
      }  
    }
 
-   public static final int TIMER_DELAY = 50;
+   public static final int TIMER_DELAY = 75;
    public static final int DELTA_X = 1;
    public static final int DELTA_Y = DELTA_X;
    private static final String PRESSED = "pressed";
@@ -92,11 +91,19 @@ public class InputListener extends JPanel {
             if (newX >= maze.win.getNumSquaresX() || newY >= maze.win.getNumSquaresY()) {
                 return;
             }
-            
-            maze.setX(newX);
-            maze.setY(newY);
-            maze.win.repaint();
-        }
+            if (maze.checkFinish()) {
+               try {
+               maze.win.resetMaze();
+               return;
+               } catch (Exception exc) {
+                  exc.printStackTrace();
+               }
+            }
+
+        maze.setX(newX);
+         maze.setY(newY);
+         maze.win.repaint();
+      }
    }
 
    private class DirAction extends AbstractAction {
