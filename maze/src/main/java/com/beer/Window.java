@@ -31,12 +31,12 @@ public class Window extends JFrame {
         setVisible(true);
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                game.maze.newMaze();
+                game.maze.genMap();
             }
             });
         resetButton.addActionListener(new ActionListener() { //reset button listener
             public void actionPerformed(ActionEvent e){  
-                game.maze.newMaze();
+                game.maze.genMap();
             }  
         }); 
     }

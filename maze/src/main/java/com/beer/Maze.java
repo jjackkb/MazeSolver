@@ -17,30 +17,24 @@ public class Maze {
         game.win.getContentPane().add(new InputListener(game));
     }
     
-    public void genRandomStartEnd() {
-        disabledCells.clear();
-        visitedCells.clear();
+    public void genMap() {
+        int totalCells = (int) (game.barrierPercentage * (game.gridX * game.gridY));
         Point point1 = newRandomPoint();
         Point point2 = newRandomPoint();
-        
+
+        disabledCells.clear();
+        visitedCells.clear();
         game.start.move(point1.x, game.gridY - 1);
         game.pos.setLocation(game.start);
         game.end.move(point2.x, 0);
-        visitedCells.clear();
-    }
-    public void genBarriers() {
-        int totalCells = (int) (game.barrierPercentage * (game.gridX * game.gridY));
-        
+
         for (int i = 0; i < totalCells; i++) {
             Point point = newRandomPoint();
             if (isCellAvailable(point) && !game.end.equals(point) && !game.start.equals(point)) {
                 disabledCells.add(point);
             }
         }
-    }
-    public void newMaze() {
-        genRandomStartEnd();
-        genBarriers();
+        visitedCells.clear();
         game.grid.repaint();
     }
     public int getPossibles() {
@@ -76,25 +70,9 @@ public class Maze {
         int randomY = (int) (Math.random() * game.gridY);
         return new Point(randomX, randomY);
     }   
-    protected boolean isDisabled(int x, int y) {
-        for (Point point : disabledCells) {
-            if (point.x == x && point.y == y) {
-                return true;
-            }
-        }
-        return false;
-    }
-    protected boolean isVisited(int x, int y) {
-        for (Point point : visitedCells) {
-            if (point.x == x && point.y == y) {
-                return true;
-            }
-        }
-        return false;
-    }
-    protected boolean isCellAvailable(Point point) {
+    public boolean isCellAvailable(Point point) {
         if (game.end.equals(point)) {
-            newMaze();
+            genMap();
             return false;
         } 
         else if (game.start.equals(point)) {
@@ -112,7 +90,7 @@ public class Maze {
                         return false;
                     }
                 }
-            }  
+            } 
             else {
                 return false;
             }
