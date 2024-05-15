@@ -38,7 +38,7 @@ public class InputListener extends JPanel {
      }  
    }
 
-   public static final int TIMER_DELAY = 75;
+   public static final int TIMER_DELAY = 80;
    public static final int DELTA_X = 1;
    public static final int DELTA_Y = DELTA_X;
    private static final String PRESSED = "pressed";

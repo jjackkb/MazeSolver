@@ -4,6 +4,8 @@ import java.awt.event.ActionEvent;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+
 import java.awt.Point;
 import java.awt.Graphics;
 import java.awt.Color;
@@ -19,8 +21,8 @@ public class Window extends JFrame {
     private int cell_W;
     private int cell_H;
     protected Grid grid;
-    protected Maze maze;
-    public Window(int sq_X, int sq_Y, int C_w, int C_h, double percent) {
+    public Maze maze;
+    public Window(Integer sq_X, Integer sq_Y, Integer C_w, Integer C_h, Double percent) {
         super("Maze"); 
         barrierPercent = percent; 
         numSquaresX = sq_X;
@@ -31,8 +33,13 @@ public class Window extends JFrame {
         window_H = (numSquaresY * cell_H) + 250;
         
         grid = new Grid(numSquaresX, numSquaresY, cell_W, cell_H);
-        maze = new Maze(barrierPercent, this);
         JButton resetButton = new JButton("reset");
+
+        SwingUtilities.invokeLater(new Runnable() {
+        public void run() {
+            resetMaze();
+        }
+        });
 
         resetButton.setBounds((window_W/2)-40, window_H-75, (window_W/2)+40, window_H-50); 
         resetButton.setSize(80, 35); 
@@ -49,7 +56,6 @@ public class Window extends JFrame {
         add(resetButton);
         add(grid);
 
-        maze.startPlay();
         setVisible(true);
     }
 
@@ -71,6 +77,9 @@ public class Window extends JFrame {
                     return true;
         return false;
     }
+    public int getDist(int x, int y, Point p) {
+        return Math.abs(x - p.x) + Math.abs(y - p.y);
+    }
     public int getNumSquaresX() {
         return numSquaresX;
     }
@@ -89,6 +98,12 @@ public class Window extends JFrame {
     public int getWin_H() {
         return window_H;
     }
+    public int getMazeX() {
+        return maze.getX();
+    }
+    public int getMazeY() {
+        return maze.getY();
+    }
 
     public void setStartCell(Point p) {
         grid.start = p;
@@ -101,6 +116,12 @@ public class Window extends JFrame {
     }
     public void visitCell(Point p) {
         grid.visitedCells.add(p);
+    }
+    public void setX(Integer x) {
+        maze.setX(x);
+    }
+    public void setY(Integer y) {
+        maze.setY(y);
     }
 }
 

@@ -1,18 +1,20 @@
 package com.beer;
 import java.awt.Point;
+import java.util.ArrayList;
 
 public class Maze {
-    private int x;
-    private int y;
+    public Integer x;
+    public Integer y;
     private Point start;
     private Point end;
-    protected Window win;
     private InputListener inputListener;
+    public Window win;
     public Maze(double randPercent, Window window) {
         assert (randPercent <= 1.0 && randPercent >= 0.0);
 
         win = window;
         inputListener = new InputListener(this);
+
         x = 0; 
         y = 0;
 
@@ -52,6 +54,18 @@ public class Maze {
         y = start.y;
     }
 
+    public int getPossibles() {
+        ArrayList<Point> arr = new ArrayList<>();
+
+        for (int i = -1; i <= 1; i += 2) {
+            if (win.checkLoc(x + i, y))
+                arr.add(new Point(x + i, y));
+            if (win.checkLoc(x, y + i))
+                arr.add(new Point(x, y + i));
+        }
+
+        return arr.size();
+    }
     public boolean checkFinish() {
         if (x == end.x && y == end.y) {
            return true;
@@ -65,14 +79,20 @@ public class Maze {
         return false;
     }
 
-    public int getX() {
+    public Integer getX() {
         return x;
     }
-    public int getY() {
+    public Integer getY() {
         return y;
     }
+    public Integer getEndX() {
+        return end.x;
+    }
+    public Integer getEndY() {
+        return end.y;
+    }
 
-    public void setX(int newX) {
+    public void setX(Integer newX) {
         if (!win.checkLoc(newX, y)) {
             return;
         }
@@ -83,7 +103,7 @@ public class Maze {
         win.reload();
         checkFinish();
     }
-    public void setY(int newY) {
+    public void setY(Integer newY) {
         if (!win.checkLoc(x, newY)) {
             return;
         }

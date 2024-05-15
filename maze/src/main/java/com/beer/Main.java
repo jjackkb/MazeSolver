@@ -1,12 +1,11 @@
 package com.beer;
-import javax.swing.SwingUtilities;
+
+import py4j.GatewayServer;
 
 public class Main {
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Runnable() {
-         public void run() {
-            new Window(50, 50, 15, 15, 0.1);
-         }
-      });
+            Window game = new Window(50, 50, 15, 15, 0.2);
+            GatewayServer gs = new GatewayServer(game);
+            gs.start();
     }
 }
