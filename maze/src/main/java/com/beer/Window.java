@@ -1,4 +1,7 @@
 package com.beer;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Point;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.JButton;
@@ -6,229 +9,76 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-import java.awt.Point;
-import java.awt.Graphics;
-import java.awt.Color;
-import java.util.ArrayList;
-import java.util.List;
-
 public class Window extends JFrame {
-    private double barrierPercent;
-    private int numSquaresX;
-    private int numSquaresY;
-    private int window_W;
-    private int window_H;
-    private int cell_W;
-    private int cell_H;
-    protected Grid grid;
-    public Maze maze;
-    public Window(Integer sq_X, Integer sq_Y, Integer C_w, Integer C_h, Double percent) {
+    private JButton resetButton;
+    private Game game;
+    public Window(Game newGame) {
         super("Maze"); 
-        barrierPercent = percent; 
-        numSquaresX = sq_X;
-        numSquaresY = sq_Y;
-        cell_W = C_w;
-        cell_H = C_h;
-        window_W = (numSquaresX * cell_W) + (2*cell_W);
-        window_H = (numSquaresY * cell_H) + 250;
-        
-        grid = new Grid(numSquaresX, numSquaresY, cell_W, cell_H);
-        JButton resetButton = new JButton("reset");
+        game = newGame;
+        game.grid = new Grid(game);
+        resetButton = new JButton("reset");
+    }
 
-        SwingUtilities.invokeLater(new Runnable() {
-        public void run() {
-            resetMaze();
-        }
-        });
-
-        resetButton.setBounds((window_W/2)-40, window_H-75, (window_W/2)+40, window_H-50); 
+    protected void start() {
+        resetButton.setBounds((game.window_width / 2) - 40, game.cell_height - 75, (game.window_width / 2) + 40, game.window_height - 50); 
         resetButton.setSize(80, 35); 
-        setSize(window_W, window_H);
+        setSize(game.window_width, game.window_height);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        resetButton.addActionListener(new ActionListener(){  
-            public void actionPerformed(ActionEvent e){  
-                        resetMaze();
-                    }  
-                });  
-
+ 
         add(resetButton);
-        add(grid);
-
+        add(game.grid);
         setVisible(true);
-    }
-
-    public void resetMaze() {
-        grid.disabledCells.clear();
-        maze = new Maze(barrierPercent, this);
-        grid.enabledCells.clear();
-        grid.visitedCells.clear();
-        maze.startPlay();
-    }
-    public void reload() {
-        grid.paintComponent(getGraphics());
-    }
-
-    public boolean checkLoc(int x, int y) {
-        if (x < numSquaresX && x >= 0)
-            if (y < numSquaresY && y >= 0)
-                if (grid.checkLoc(x, y))
-                    return true;
-        return false;
-    }
-    public int getDist(int x, int y, Point p) {
-        return Math.abs(x - p.x) + Math.abs(y - p.y);
-    }
-    public int getNumSquaresX() {
-        return numSquaresX;
-    }
-    public int getNumSquaresY() {
-        return numSquaresY;
-    }
-    public int getCell_W() {
-        return cell_W;
-    }
-    public int getCell_H() {
-        return cell_H;
-    }
-    public int getWin_W() {
-        return window_W;
-    }
-    public int getWin_H() {
-        return window_H;
-    }
-    public int getMazeX() {
-        return maze.getX();
-    }
-    public int getMazeY() {
-        return maze.getY();
-    }
-
-    public void setStartCell(Point p) {
-        grid.start = p;
-    }
-    public void setEndCell(Point p) {
-        grid.end = p;
-    }
-    public void disableCell(Point p) {
-        grid.disabledCells.add(p);
-    }
-    public void visitCell(Point p) {
-        grid.visitedCells.add(p);
-    }
-    public void setX(Integer x) {
-        maze.setX(x);
-    }
-    public void setY(Integer y) {
-        maze.setY(y);
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                game.maze.newMaze();
+            }
+            });
+        resetButton.addActionListener(new ActionListener() { //reset button listener
+            public void actionPerformed(ActionEvent e){  
+                game.maze.newMaze();
+            }  
+        }); 
     }
 }
 
 class Grid extends JPanel {
-    protected List<Point> enabledCells;
-    protected List<Point> disabledCells;
-    protected List<Point> visitedCells;
-    protected Point start;
-    protected Point end;
-    protected int width;
-    protected int height;
-    protected int sqSizeWidth;
-    protected int sqSizeHeight;
-    protected int sqNumWidth;
-    protected int sqNumHeight;
-    public Grid(int sqX, int sqY, int sWidth, int sHeight) {
+    private Game game;
+    public Grid(Game newGame) {
         super();
-        sqNumWidth = sqX;
-        sqNumHeight = sqY;
-        sqSizeWidth = sWidth;
-        sqSizeHeight = sHeight;
-        width = sqX * sqSizeWidth;
-        height = sqY * sqSizeHeight;
-
-        enabledCells = new ArrayList<>();
-        disabledCells = new ArrayList<>();
-        visitedCells = new ArrayList<>();
+        game = newGame;
     }
-
+    
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        //background
-        g.setColor(new Color(253,255,252));
-        g.fillRect(sqSizeWidth, sqSizeHeight, width, height);
-        //start/end Points
-        g.setColor(new Color(76,185,68));
-        g.fillRect((sqSizeWidth+(start.x*sqSizeWidth)), (sqSizeHeight+(start.y*sqSizeHeight)), sqSizeWidth, sqSizeHeight);
-        g.setColor(new Color(171,52,40));
-        g.fillRect((sqSizeWidth+(end.x*sqSizeWidth)), (sqSizeHeight+(end.y*sqSizeHeight)), sqSizeWidth, sqSizeHeight);
-
-        for (Point fillCell : disabledCells) { //draw disabled cells
-            int cellX = sqSizeWidth + (fillCell.x * sqSizeWidth);
-            int cellY = sqSizeHeight + (fillCell.y * sqSizeHeight);
-            g.setColor(Color.BLACK);
-            g.fillRect(cellX, cellY, sqSizeWidth, sqSizeHeight);
+        g.setColor(new Color(253,255,252));//background
+        g.fillRect(game.cell_width, game.cell_height, game.grid_width, game.grid_height);
+        g.setColor(new Color(76,185,68));//start cell
+        g.fillRect((game.cell_width + (game.start.x * game.cell_width)), (game.cell_height + (game.start.y * game.cell_height)), game.cell_width, game.cell_height);
+        g.setColor(new Color(171,52,40));//end cell
+        g.fillRect((game.cell_width + (game.end.x * game.cell_width)), (game.cell_height + (game.end.y * game.cell_height)), game.cell_width, game.cell_height);
+        
+        for (Point fillCell : game.maze.disabledCells) { 
+            int cellX = game.cell_width + (fillCell.x * game.cell_width);
+            int cellY = game.cell_height + (fillCell.y * game.cell_height);
+            g.setColor(Color.BLACK);//disabled cells
+            g.fillRect(cellX, cellY, game.cell_width, game.cell_height);
         }
-
-        for (Point fillCell : visitedCells) { //draw visited cells
-            int cellX = sqSizeWidth + (fillCell.x * sqSizeWidth);
-            int cellY = sqSizeHeight + (fillCell.y * sqSizeHeight);
-            g.setColor(new Color(244,158,76));
-            g.fillRect(cellX, cellY, sqSizeWidth, sqSizeHeight);
+        for (Point fillCell : game.maze.visitedCells) { 
+            int cellX = game.cell_width + (fillCell.x * game.cell_width);
+            int cellY = game.cell_height + (fillCell.y * game.cell_height);
+            g.setColor(new Color(244,158,76));//visited cells
+            g.fillRect(cellX, cellY, game.cell_width, game.cell_height);
         }
         
-        //outer Rectangle
-        g.setColor(new Color(42,43,42));
-        g.drawRect(sqSizeWidth, sqSizeHeight, width, height);
-        //crossed lines
-        for (int i = sqSizeWidth; i <= width; i += sqSizeWidth) { //horizontal
-            g.drawLine(i, sqSizeHeight, i, height+sqSizeHeight);
+        g.setColor(new Color(42,43,42));//line color
+        g.drawRect(game.cell_width, game.cell_height, game.grid_width, game.grid_height);
+        for (int i = game.cell_width; i <= game.grid_width; i += game.cell_width) { //horizontal
+            g.drawLine(i, game.cell_height, i, game.grid_height + game.cell_height);
         }
-        for (int i = sqSizeHeight; i <= height; i += sqSizeHeight) { //vertical
-            g.drawLine(sqSizeWidth, i, width+sqSizeHeight, i); 
+        for (int i = game.cell_height; i <= game.grid_height; i += game.cell_height) { //vertical
+            g.drawLine(game.cell_width, i, game.grid_width + game.cell_height, i); 
         }
-    }
-
-    public boolean isEnabled(int x, int y) {
-        for (Point p : enabledCells) {
-            if (p.x == x && p.y == y) {
-                return true;
-            }
-        }
-        return false;
-    }
-    public boolean isDisabled(int x, int y) {
-        for (Point p : disabledCells) {
-            if (p.x == x && p.y == y) {
-                return true;
-            }
-        }
-        return false;
-    }
-    public boolean isVisited(int x, int y) {
-        for (Point p : visitedCells) {
-            if (p.x == x && p.y == y) {
-                return true;
-            }
-        }
-        return false;
-    }
-    public boolean checkLoc(int x, int y) {
-        if (start.x == x && start.y == y)
-            return false;
-
-        for (Point p : enabledCells)
-            if (p.x == x && p.y == y)
-                return false;
-
-        for (Point p : disabledCells)
-            if (p.x == x && p.y == y)
-                return false;
-
-        for (Point p : visitedCells)
-            if (p.x == x && p.y == y)
-                return false;
-
-        return true;
     }
 }

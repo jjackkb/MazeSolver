@@ -1,117 +1,126 @@
 package com.beer;
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.List;
 
 public class Maze {
-    public Integer x;
-    public Integer y;
-    private Point start;
-    private Point end;
-    private InputListener inputListener;
-    public Window win;
-    public Maze(double randPercent, Window window) {
-        assert (randPercent <= 1.0 && randPercent >= 0.0);
-
-        win = window;
-        inputListener = new InputListener(this);
-
-        x = 0; 
-        y = 0;
-
-        win.getContentPane().add(inputListener);
-        genRandomStartEnd();
-        genBarriers(randPercent);
+    private Game game;
+    protected List<Point> disabledCells = new ArrayList<>();
+    protected List<Point> visitedCells = new ArrayList<>();
+    public Maze(Game newGame) {
+        game = newGame;
+        game.pos = new Point(0, 0);
+        game.start = new Point(game.pos);
+        game.end = new Point(game.start);
+        
+        assert (game.barrierPercentage <= 1.0 && game.barrierPercentage >= 0.0);
+        game.win.getContentPane().add(new InputListener(game));
     }
-
-    public void genRandomStartEnd() {
-        int randomX1 = (int) (Math.random() * win.getNumSquaresX()-2) + 1;
-        int randomX2 = (int) (Math.random() * win.getNumSquaresX()-2) + 1;
-
-        Point start = new Point(randomX1, win.getNumSquaresY()-1);
-        Point end = new Point(randomX2, 0);
-
-        this.start = start;
-        this.end = end;
-        win.setStartCell(start);
-        win.setEndCell(end);
+    
+    private void genRandomStartEnd() {
+        disabledCells.clear();
+        visitedCells.clear();
+        Point point1 = newRandomPoint();
+        Point point2 = newRandomPoint();
+        
+        game.start.move(point1.x, game.gridY - 1);
+        game.pos.setLocation(game.start);
+        game.end.move(point2.x, 0);
+        visitedCells.clear();
     }
-
-    public void genBarriers(double percent) {
-        int max = (int) (percent*(win.getNumSquaresX()*win.getNumSquaresY()));
-
-        for (int i = 0; i < max; i++) {
-            int randX = (int) (Math.random() * win.getNumSquaresX());
-            int randY = (int) (Math.random() * win.getNumSquaresY());
-
-            if (win.checkLoc(randX, randY) && !checkFinish(randX, randY)) {
-                win.disableCell(new Point(randX, randY));
+    private void genBarriers() {
+        int totalCells = (int) (game.barrierPercentage * (game.gridX * game.gridY));
+        
+        for (int i = 0; i < totalCells; i++) {
+            Point point = newRandomPoint();
+            if (isCellAvailable(point) && !game.end.equals(point) && !game.start.equals(point)) {
+                disabledCells.add(point);
             }
         }
     }
-
-    public void startPlay() {
-        x = start.x;
-        y = start.y;
+    protected void newMaze() {
+        genRandomStartEnd();
+        genBarriers();
+        game.grid.repaint();
     }
-
-    public int getPossibles() {
-        ArrayList<Point> arr = new ArrayList<>();
-
+    protected int getPossibles() {
+        int possibles = 0;
         for (int i = -1; i <= 1; i += 2) {
-            if (win.checkLoc(x + i, y))
-                arr.add(new Point(x + i, y));
-            if (win.checkLoc(x, y + i))
-                arr.add(new Point(x, y + i));
+            Point point1 = new Point(game.pos.x + i, game.pos.y);
+            Point point2 = new Point(game.pos.x, game.pos.y + i);
+            if (isCellAvailable(point1))
+            possibles++;
+            if (isCellAvailable(point2))
+            possibles++;
         }
-
-        return arr.size();
+        return possibles;
     }
-    public boolean checkFinish() {
-        if (x == end.x && y == end.y) {
-           return true;
+    
+    //helpers
+    protected void setX(Integer newX) {
+        Point newPoint = new Point(newX, game.pos.y);
+        if (isCellAvailable(newPoint)) {
+            game.pos.setLocation(newPoint);
+            if (!game.start.equals(game.pos)) {
+                visitedCells.add(newPoint);
+            }
+        }
+    }
+    protected void setY(Integer newY) {
+        Point newPoint = new Point(game.pos.x, newY);
+        if (game.maze.isCellAvailable(newPoint)) {
+            game.pos.setLocation(newPoint);
+            if (!game.start.equals(game.pos)) {
+                visitedCells.add(newPoint);
+            }
+        }
+    }
+    private Point newRandomPoint() {
+        int randomX = (int) (Math.random() * game.gridX);
+        int randomY = (int) (Math.random() * game.gridY);
+        return new Point(randomX, randomY);
+    }   
+    protected boolean isDisabled(int x, int y) {
+        for (Point point : disabledCells) {
+            if (point.x == x && point.y == y) {
+                return true;
+            }
         }
         return false;
     }
-    public boolean checkFinish(int x, int y) {
-        if (x == end.x && y == end.y) {
-           return true;
+    protected boolean isVisited(int x, int y) {
+        for (Point point : visitedCells) {
+            if (point.x == x && point.y == y) {
+                return true;
+            }
         }
         return false;
     }
-
-    public Integer getX() {
-        return x;
-    }
-    public Integer getY() {
-        return y;
-    }
-    public Integer getEndX() {
-        return end.x;
-    }
-    public Integer getEndY() {
-        return end.y;
-    }
-
-    public void setX(Integer newX) {
-        if (!win.checkLoc(newX, y)) {
-            return;
-        }
+    protected boolean isCellAvailable(Point point) {
+        if (game.end.equals(point)) {
+            newMaze();
+            return false;
+        } 
         else {
-            x = newX;
-            win.visitCell(new Point(x, y));
+            if (point.x < game.gridX && point.x >= 0 && point.y < game.gridY && point.y >= 0) {
+                for (Point dC : disabledCells) {
+                    if (dC.equals(point)) {
+                        return false;
+                    }
+                }
+                for (Point vC : visitedCells) {
+                    if (vC.equals(point)) {
+                        return false;
+                    }
+                }
+            }  
+            else {
+                return false;
+            }
         }
-        win.reload();
-        checkFinish();
+        return true;
     }
-    public void setY(Integer newY) {
-        if (!win.checkLoc(x, newY)) {
-            return;
-        }
-        else {
-            y = newY;
-            win.visitCell(new Point(x, y));
-        }
-        win.reload();
-        checkFinish();
+    protected int getDistance(Point p1, Point p2) {
+        return Math.abs(p1.x - p2.x) + Math.abs(p1.y - p2.y);
     }
 }

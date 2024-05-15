@@ -38,17 +38,17 @@ public class InputListener extends JPanel {
      }  
    }
 
-   public static final int TIMER_DELAY = 80;
+   public static final int TIMER_DELAY = 70;
    public static final int DELTA_X = 1;
    public static final int DELTA_Y = DELTA_X;
    private static final String PRESSED = "pressed";
    private static final String RELEASED = "released";
    private Map<Dir, Boolean> dirMap = new EnumMap<>(Dir.class);
    private Timer animationTimer = new Timer(TIMER_DELAY, new ControlListener());
-   private static Maze maze;
+   private Game game;
 
-   public InputListener(Maze game) {
-    maze = game;
+   public InputListener(Game newGame) {
+      game = newGame;
       for (Dir dir : Dir.values()) {
          dirMap.put(dir, Boolean.FALSE);
       }
@@ -77,32 +77,18 @@ public class InputListener extends JPanel {
    private class ControlListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            int newX = maze.getX();
-            int newY = maze.getY();
+            int newX = game.pos.x;
+            int newY = game.pos.y;
             for (Dir dir : Dir.values()) {
                 if (dirMap.get(dir)) {
                     newX += dir.getDeltaX() * DELTA_X;
                     newY += dir.getDeltaY() * DELTA_Y;
                     }
                 }
-            if (newX < 0 || newY < 0) {
-                return;
-            }
-            if (newX >= maze.win.getNumSquaresX() || newY >= maze.win.getNumSquaresY()) {
-                return;
-            }
-            if (maze.checkFinish()) {
-               try {
-               maze.win.resetMaze();
-               return;
-               } catch (Exception exc) {
-                  exc.printStackTrace();
-               }
-            }
-
-        maze.setX(newX);
-         maze.setY(newY);
-         maze.win.repaint();
+                
+         game.maze.setX(newX);
+         game.maze.setY(newY);
+         game.grid.repaint();
       }
    }
 
