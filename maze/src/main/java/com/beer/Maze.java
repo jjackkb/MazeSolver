@@ -34,6 +34,8 @@ public class Maze {
                 disabledCells.add(point);
             }
         }
+        game.movesCount = 0;
+        game.win.updateGames();
         visitedCells.clear();
         game.grid.repaint();
     }
@@ -56,6 +58,7 @@ public class Maze {
         if (isCellAvailable(newPoint)) {
             game.pos.setLocation(newPoint);
             visitedCells.add(newPoint);
+            game.win.updateMoves();
         }
     }
     public void setY(Integer newY) {
@@ -63,6 +66,7 @@ public class Maze {
         if (isCellAvailable(newPoint)) {
             game.pos.setLocation(newPoint);
             visitedCells.add(newPoint);
+            game.win.updateMoves();
         }
     }
     private Point newRandomPoint() {
@@ -72,6 +76,7 @@ public class Maze {
     }   
     public boolean isCellAvailable(Point point) {
         if (game.end.equals(point)) {
+            game.gameCount++;
             genMap();
             return false;
         } 

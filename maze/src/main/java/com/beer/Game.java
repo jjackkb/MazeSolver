@@ -13,6 +13,8 @@ public class Game {
     protected int cell_height;
     protected int gridX;
     protected int gridY;
+    protected int gameCount;
+    protected int movesCount;
     protected Point pos;
     protected Point start;
     protected Point end;
@@ -21,6 +23,8 @@ public class Game {
     protected Grid grid;
     public Game(int gridWidth, int gridHeight, int cellWidth, int cellHeight, double percent) {
         barrierPercentage = percent;
+        gameCount = 0;
+        movesCount = 0;
         gridX = gridWidth;
         gridY = gridHeight;
         cell_width = cellWidth;
@@ -28,7 +32,7 @@ public class Game {
         grid_width = gridX * cell_width;
         grid_height = gridY * cell_height;
         window_width = grid_width + (3 * cell_width);
-        window_height = grid_height + 250;
+        window_height = grid_height + 150;
 
         win = new Window(this);
         maze = new Maze(this);
@@ -36,7 +40,5 @@ public class Game {
     }
 
     public Grid getGrid() { return grid; }
-    public List<Point> getPoints() {
-        return new ArrayList<>() {{ add(start); add(end); add(pos); }};
-    }
+    public List<Point> getPoints() { return new ArrayList<>() {{ add(start); add(end); add(pos); }}; }
 }

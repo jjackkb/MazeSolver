@@ -3,47 +3,62 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Point;
+import java.awt.Font;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
-
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
-
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 public class Window extends JFrame {
-    private JPanel panel = new JPanel();
-    private GroupLayout layout = new GroupLayout(panel);
+    private JPanel panel;
+    private GroupLayout layout;
+    private Font textFont;
+    private JLabel games;
+    private JLabel moves;
     private JButton resetButton;
     private Game game;
     public Window(Game newGame) {
         super("Maze"); 
         game = newGame;
-        game.grid = new Grid(game);
+        textFont = new Font("Verdana", Font.BOLD, 14);
+        panel = new JPanel();
+        layout = new GroupLayout(panel);
         resetButton = new JButton("reset");
+        moves = new JLabel();
+        games = new JLabel();
+        game.grid = new Grid(game);
     }
 
     protected void start() {
         panel.setLayout(layout);
+        moves.setFont(textFont);
+        games.setFont(textFont);
         resetButton.setPreferredSize(new Dimension(80, 35)); 
-        resetButton.setMinimumSize(new Dimension(80, 3));
         setSize(game.window_width, game.window_height);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         layout.setAutoCreateGaps(true);
         layout.setAutoCreateContainerGaps(true);
-        layout.setHorizontalGroup(
-            layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
-                .addComponent(game.grid)
-                .addComponent(resetButton)));
-        layout.setVerticalGroup(
-            layout.createSequentialGroup()
-            .addComponent(game.grid)
-            .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+
+        layout.setHorizontalGroup(layout.createSequentialGroup() //horizontal main group
+        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER) //center main group
+            .addComponent(game.grid) 
+            .addGroup(layout.createSequentialGroup() //sub group for games and moves
+                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                    .addComponent(games))
+                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                    .addComponent(moves)))
             .addComponent(resetButton)));
+        layout.setVerticalGroup(layout.createSequentialGroup() //vertical main group
+            .addComponent(game.grid)
+            .addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER) //sub group for games and moves
+                .addComponent(moves)
+                .addComponent(games))
+            .addComponent(resetButton));
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -56,6 +71,14 @@ public class Window extends JFrame {
 
         add(panel);
         setVisible(true);
+    }
+    public void updateMoves() {
+        game.win.moves.setText("Move: " + game.movesCount);
+        game.movesCount++;
+    }
+    public void updateGames() {
+        games.setText("Maze: " + game.gameCount);
+        updateMoves();
     }
 }
 
