@@ -2,10 +2,10 @@ import org.junit.Assert;
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.junit.Test;
 import com.beer.Maze;
 import com.beer.Game;
+
 public class MazeTest {
     private Game game = new Game(10, 10, 5, 5);
     private Maze maze = new Maze(game);
@@ -13,10 +13,10 @@ public class MazeTest {
     private Point start = points.get(0);
     private Point end = points.get(1);
     private Point pos = points.get(2);
-    private List<Point> emptyListPoint = new ArrayList<>();
 
     @Test
-    public void genRandomStartEnd() {
+    public void genMap() {
+        List<Point> emptyListPoint = new ArrayList<>();
         maze.disabledCells = new ArrayList<Point>() {{
             add(new Point(0, 3));
             add(new Point(6, 7));
@@ -49,25 +49,43 @@ public class MazeTest {
     }
     @Test
     public void setX() {
-        pos.move(5, 5);
+        end.move(0, 0);
+        pos.move(3, 0); 
         maze.disabledCells.clear();
         maze.visitedCells.clear();
+        Point disabledCell = new Point(2, 0);
+        maze.disabledCells.add(disabledCell);
 
-        maze.setX(6);
+        maze.setX(2);
+        Point newPointDisable = new Point(pos);
+        maze.setX(1);
+        Point newPointPass = new Point(pos);
+        maze.setX(0);
+        Point newPointEnd = new Point(pos);
 
-        Assert.assertEquals(6, pos.x);
-        Assert.assertEquals(5, pos.y);
+        Assert.assertNotEquals(newPointDisable, disabledCell);
+        Assert.assertEquals(newPointPass, new Point(1, 0));
+        Assert.assertEquals(newPointEnd, start);
     }
     @Test
     public void setY() {
-        pos.move(5, 5);
+        end.move(0, 0);
+        Point disabledCell = new Point(0, 2);
+        pos.move(0, 3); 
         maze.disabledCells.clear();
         maze.visitedCells.clear();
+        maze.disabledCells.add(disabledCell);
 
-        maze.setY(4);
+        maze.setY(2);
+        Point newPointDisable = new Point(pos);
+        maze.setY(1);
+        Point newPointPass = new Point(pos);
+        maze.setY(0);
+        Point newPointEnd = new Point(pos);
 
-        Assert.assertEquals(5, pos.x);
-        Assert.assertEquals(4, pos.y);
+        Assert.assertNotEquals(newPointDisable, disabledCell);
+        Assert.assertEquals(newPointPass, new Point(0, 1));
+        Assert.assertEquals(newPointEnd, start);
     }
     @Test
     public void isCellAvailable() {
@@ -94,5 +112,6 @@ public class MazeTest {
         Assert.assertFalse(visitedCellFalse);
         Assert.assertFalse(startFalse);
         Assert.assertFalse(endFalse);
+        Assert.assertEquals(pos, start);
     }
 }

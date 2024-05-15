@@ -46,7 +46,7 @@ public class InputListener extends JPanel {
    private Map<Dir, Boolean> dirMap = new EnumMap<>(Dir.class);
    private Timer animationTimer = new Timer(TIMER_DELAY, new ControlListener());
    private Game game;
-
+   
    public InputListener(Game newGame) {
       game = newGame;
       for (Dir dir : Dir.values()) {
@@ -71,7 +71,6 @@ public class InputListener extends JPanel {
          actionMap.put(dir.toString() + PRESSED, new DirAction(dir, PRESSED));
          actionMap.put(dir.toString() + RELEASED, new DirAction(dir, RELEASED));
       }
-
    }
 
    private class ControlListener implements ActionListener {
@@ -86,17 +85,19 @@ public class InputListener extends JPanel {
                     }
                 }
                 
-         game.maze.setX(newX);
-         game.maze.setY(newY);
+         if (newX != game.pos.x) {
+            game.maze.setX(newX);
+         }
+         else if (newY != game.pos.y) {
+            game.maze.setY(newY);
+         }
          game.grid.repaint();
       }
    }
 
    private class DirAction extends AbstractAction {
-
       private String pressedOrReleased;
       private Dir dir;
-
       public DirAction(Dir dir, String pressedOrReleased) {
          this.dir = dir;
          this.pressedOrReleased = pressedOrReleased;

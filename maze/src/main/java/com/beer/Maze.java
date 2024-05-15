@@ -25,8 +25,8 @@ public class Maze {
         disabledCells.clear();
         visitedCells.clear();
         game.start.move(point1.x, game.gridY - 1);
-        game.pos.setLocation(game.start);
         game.end.move(point2.x, 0);
+        game.pos.setLocation(game.start);
 
         for (int i = 0; i < totalCells; i++) {
             Point point = newRandomPoint();
@@ -60,7 +60,7 @@ public class Maze {
     }
     public void setY(Integer newY) {
         Point newPoint = new Point(game.pos.x, newY);
-        if (game.maze.isCellAvailable(newPoint)) {
+        if (isCellAvailable(newPoint)) {
             game.pos.setLocation(newPoint);
             visitedCells.add(newPoint);
         }
