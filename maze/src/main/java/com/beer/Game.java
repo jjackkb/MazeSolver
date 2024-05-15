@@ -19,15 +19,15 @@ public class Game {
     protected Maze maze;
     protected Window win;
     protected Grid grid;
-    public Game(int gridWidth, int gridHeight, int cellWidth, int cellHeight) {
-        barrierPercentage = 0.05;
+    public Game(int gridWidth, int gridHeight, int cellWidth, int cellHeight, double percent) {
+        barrierPercentage = percent;
         gridX = gridWidth;
         gridY = gridHeight;
         cell_width = cellWidth;
         cell_height = cellHeight;
         grid_width = gridX * cell_width;
         grid_height = gridY * cell_height;
-        window_width = grid_width + (2 * cell_width);
+        window_width = grid_width + (3 * cell_width);
         window_height = grid_height + 250;
 
         win = new Window(this);

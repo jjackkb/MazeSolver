@@ -1,15 +1,21 @@
 package com.beer;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+
+import javax.swing.GroupLayout;
 import javax.swing.JButton;
+
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 public class Window extends JFrame {
+    private JPanel panel = new JPanel();
+    private GroupLayout layout = new GroupLayout(panel);
     private JButton resetButton;
     private Game game;
     public Window(Game newGame) {
@@ -20,25 +26,36 @@ public class Window extends JFrame {
     }
 
     protected void start() {
-        resetButton.setBounds((game.window_width / 2) - 40, game.cell_height - 75, (game.window_width / 2) + 40, game.window_height - 50); 
-        resetButton.setSize(80, 35); 
+        panel.setLayout(layout);
+        resetButton.setPreferredSize(new Dimension(80, 35)); 
+        resetButton.setMinimumSize(new Dimension(80, 3));
         setSize(game.window_width, game.window_height);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
- 
-        add(resetButton);
-        add(game.grid);
-        setVisible(true);
+        layout.setAutoCreateGaps(true);
+        layout.setAutoCreateContainerGaps(true);
+        layout.setHorizontalGroup(
+            layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+                .addComponent(game.grid)
+                .addComponent(resetButton)));
+        layout.setVerticalGroup(
+            layout.createSequentialGroup()
+            .addComponent(game.grid)
+            .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+            .addComponent(resetButton)));
+
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 game.maze.genMap();
-            }
-            });
+            }});
         resetButton.addActionListener(new ActionListener() { //reset button listener
             public void actionPerformed(ActionEvent e){  
                 game.maze.genMap();
-            }  
-        }); 
+            }}); 
+
+        add(panel);
+        setVisible(true);
     }
 }
 
@@ -47,6 +64,8 @@ class Grid extends JPanel {
     public Grid(Game newGame) {
         super();
         game = newGame;
+        setPreferredSize(new Dimension(game.grid_width, game.grid_height));
+        setMinimumSize(new Dimension(game.grid_width, game.grid_height));
     }
     
     @Override

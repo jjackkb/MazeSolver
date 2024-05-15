@@ -7,7 +7,7 @@ import com.beer.Maze;
 import com.beer.Game;
 
 public class MazeTest {
-    private Game game = new Game(10, 10, 5, 5);
+    private Game game = new Game(10, 10, 5, 5, 0.10);
     private Maze maze = new Maze(game);
     private List<Point> points = game.getPoints();
     private Point start = points.get(0);
