@@ -1,5 +1,7 @@
 package com.beer;
 import java.awt.Point;
+import java.util.List;
+import java.util.ArrayList;
 
 public class Game {
     protected double barrierPercentage;
@@ -31,5 +33,10 @@ public class Game {
         win = new Window(this);
         maze = new Maze(this);
         win.start();
+    }
+
+    public Grid getGrid() { return grid; }
+    public List<Point> getPoints() {
+        return new ArrayList<>() {{ add(start); add(end); add(pos); }};
     }
 }

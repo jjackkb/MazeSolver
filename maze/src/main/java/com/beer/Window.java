@@ -50,7 +50,7 @@ class Grid extends JPanel {
     }
     
     @Override
-    protected void paintComponent(Graphics g) {
+    public void paintComponent(Graphics g) {
         super.paintComponent(g);
         g.setColor(new Color(253,255,252));//background
         g.fillRect(game.cell_width, game.cell_height, game.grid_width, game.grid_height);
@@ -66,10 +66,12 @@ class Grid extends JPanel {
             g.fillRect(cellX, cellY, game.cell_width, game.cell_height);
         }
         for (Point fillCell : game.maze.visitedCells) { 
-            int cellX = game.cell_width + (fillCell.x * game.cell_width);
-            int cellY = game.cell_height + (fillCell.y * game.cell_height);
-            g.setColor(new Color(244,158,76));//visited cells
-            g.fillRect(cellX, cellY, game.cell_width, game.cell_height);
+            if (!game.start.equals(fillCell)) {
+                int cellX = game.cell_width + (fillCell.x * game.cell_width);
+                int cellY = game.cell_height + (fillCell.y * game.cell_height);
+                g.setColor(new Color(244,158,76));//visited cells
+                g.fillRect(cellX, cellY, game.cell_width, game.cell_height);
+            }
         }
         
         g.setColor(new Color(42,43,42));//line color
