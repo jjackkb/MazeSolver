@@ -14,12 +14,10 @@ public class FrameLayout extends GroupLayout {
     private Stat games = new Stat("Maze: ", game.getGames());
     private Stat moves = new Stat("Move: ", game.getMoves());
     private FrameButton reset = new FrameButton("reset", game.getResetActionListener(), new Dimension(80, 35));
-
     public FrameLayout(Frame frame, Game game) {
         super(frame);
 
         reset.setPreferredSize(new Dimension(80, 35)); 
-
         setAutoCreateGaps(true);
         setAutoCreateContainerGaps(true);
         setHorizontalGroup();
@@ -57,7 +55,7 @@ class Stat extends JLabel {
         obj = object;
         text = message;
 
-        setText(text + object.toString());
+        update();
     }
 
     public void update() {
@@ -88,7 +86,6 @@ class FrameButton extends JButton {
     private String text;
     private ActionListener action;
     private Dimension dimension;
-
     public FrameButton(String message, ActionListener actionObject, Dimension size) {
         text = message;
         action = actionObject;
