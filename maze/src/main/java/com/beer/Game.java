@@ -1,9 +1,13 @@
 package com.beer;
 import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.List;
 import java.util.ArrayList;
 
 public class Game {
+    protected Integer gameCount;
+    protected Integer movesCount;
     protected double barrierPercentage;
     protected int window_width;
     protected int window_height;
@@ -13,8 +17,6 @@ public class Game {
     protected int cell_height;
     protected int gridX;
     protected int gridY;
-    protected int gameCount;
-    protected int movesCount;
     protected Point pos;
     protected Point start;
     protected Point end;
@@ -39,6 +41,18 @@ public class Game {
         win.start();
     }
 
+    public ActionListener getResetActionListener() {
+        return new ActionListener() { //reset button listener
+            public void actionPerformed(ActionEvent e){  
+                maze.genMap();
+            }}; 
+    }
+    public Integer getGames() {
+        return gameCount;
+    }
+    public Integer getMoves() {
+        return movesCount;
+    }
     public Grid getGrid() { return grid; }
     public List<Point> getPoints() { return new ArrayList<>() {{ add(start); add(end); add(pos); }}; }
 }
