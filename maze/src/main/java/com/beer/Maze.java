@@ -5,10 +5,12 @@ import java.util.List;
 
 public class Maze {
     private Game game;
+    private boolean startTop;
     public List<Point> disabledCells = new ArrayList<>();
     public List<Point> visitedCells = new ArrayList<>();
     public Maze(Game newGame) {
         game = newGame;
+        startTop = false;
         game.pos = new Point(0, 0);
         game.start = new Point(game.pos);
         game.end = new Point(game.start);
@@ -19,21 +21,40 @@ public class Maze {
     
     public void genMap() {
         int totalCells = (int) (game.barrierPercentage * (game.gridX * game.gridY));
-        Point point1 = newRandomPoint();
-        Point point2 = newRandomPoint();
+        int point1 = (int) (Math.random() * (game.gridX / 2));
+        int point2 = (int) (Math.random() * (game.gridX - (game.gridX / 2))) + (game.gridX / 2);
 
         disabledCells.clear();
         visitedCells.clear();
-        game.start.move(point1.x, game.gridY - 1);
-        game.end.move(point2.x, 0);
+        if (startTop) {
+            if (Math.random() > 0.49) {
+                game.start.move(point1, 0);
+                game.end.move(point2, game.gridY - 1);
+            }
+            else {
+                game.start.move(point2, 0);
+                game.end.move(point1, game.gridY - 1);
+            }
+        }
+        else {
+            if (Math.random() <= 49) {
+                game.start.move(point1, game.gridY - 1);
+                game.end.move(point2, 0);
+            }
+            else {
+                game.start.move(point2, game.gridY -1);
+                game.end.move(point1, 0);
+            }    
+        }
         game.pos.setLocation(game.start);
 
         for (int i = 0; i < totalCells; i++) {
-            Point point = newRandomPoint();
+            Point point = newRandomPoint(0, game.gridX);
             if (isCellAvailable(point) && !game.end.equals(point) && !game.start.equals(point)) {
                 disabledCells.add(point);
             }
         }
+        startTop = !startTop;
         game.movesCount = 0;
         game.win.updateGames();
         visitedCells.clear();
@@ -69,9 +90,9 @@ public class Maze {
             game.win.updateMoves();
         }
     }
-    private Point newRandomPoint() {
-        int randomX = (int) (Math.random() * game.gridX);
-        int randomY = (int) (Math.random() * game.gridY);
+    private Point newRandomPoint(int min, int max) {
+        int randomX = (int) (Math.random() * max-min) + min;
+        int randomY = (int) (Math.random() * max - min) + min;
         return new Point(randomX, randomY);
     }   
     public boolean isCellAvailable(Point point) {

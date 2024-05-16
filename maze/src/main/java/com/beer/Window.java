@@ -24,7 +24,7 @@ public class Window extends JFrame {
     public Window(Game newGame) {
         super("Maze"); 
         game = newGame;
-        textFont = new Font("Verdana", Font.BOLD, 14);
+        textFont = new Font("Helvetica", Font.BOLD, 14);
         panel = new JPanel();
         layout = new GroupLayout(panel);
         resetButton = new JButton("reset");
